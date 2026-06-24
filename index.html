@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ConciergeAI - An advanced multi-agent personal concierge assistant visualizing planning, scheduling, travel planning, task prioritization, and safety auditing in real-time." />
+    <title>ConciergeAI - Multi-Agent Concierge Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app-container">
+      <!-- HEADER -->
+      <header id="main-header">
+        <div class="header-logo-section">
+          <div class="logo-glow-dot"></div>
+          <h1 id="app-title">ConciergeAI</h1>
+          <span class="version-tag">v1.2.0</span>
+        </div>
+        <div class="system-status-indicator">
+          <div class="status-group">
+            <span class="status-label">SYSTEM STATE:</span>
+            <span id="system-status-text" class="status-value status-online">ACTIVE</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-group">
+            <span class="status-label">ACTIVE AGENTS:</span>
+            <span id="active-agents-count" class="status-value">0 / 9</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-group">
+            <span class="status-label">LATENCY:</span>
+            <span id="system-latency" class="status-value">12ms</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN APP CONTAINER -->
+      <main id="app-layout">
+        
+        <!-- COLUMN 1: MULTI-AGENT MONITOR -->
+        <aside id="agent-monitor" aria-label="Agent Activity Monitor">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <i data-lucide="cpu" class="panel-icon"></i>
+              <h2>Agent Status Nodes</h2>
+            </div>
+            <span class="pulse-beacon"></span>
+          </div>
+          
+          <!-- Phase Flow Tracker -->
+          <div class="phase-tracker">
+            <div class="phase-steps">
+              <div class="phase-step active" id="phase-understand" title="Understand">U</div>
+              <div class="phase-step" id="phase-context" title="Context Extraction">C</div>
+              <div class="phase-step" id="phase-gap" title="Gap Analysis">G</div>
+              <div class="phase-step" id="phase-solution" title="Solution Generation">S</div>
+              <div class="phase-step" id="phase-decision" title="Decision Making">D</div>
+              <div class="phase-step" id="phase-validate" title="Validation">V</div>
+              <div class="phase-step" id="phase-response" title="Response Construction">R</div>
+            </div>
+            <div class="phase-line">
+              <div id="phase-line-progress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Agents Grid -->
+          <div class="agents-grid">
+            <!-- 1. Intent Classifier -->
+            <div class="agent-card" id="agent-intent" data-agent="intent">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="filter" class="agent-icon"></i>
+                  <span class="agent-name">Intent Classifier</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Categorizes user objectives & detects urgency.</div>
+              <div class="agent-console" id="console-intent">Idle...</div>
+            </div>
+
+            <!-- 2. Context Agent -->
+            <div class="agent-card" id="agent-context" data-agent="context">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="search" class="agent-icon"></i>
+                  <span class="agent-name">Context Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Extracts details, targets, & location constraints.</div>
+              <div class="agent-console" id="console-context">Idle...</div>
+            </div>
+
+            <!-- 3. Planning Agent -->
+            <div class="agent-card" id="agent-planning" data-agent="planning">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="git-branch" class="agent-icon"></i>
+                  <span class="agent-name">Planning Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Breaks down goals into strategic milestones.</div>
+              <div class="agent-console" id="console-planning">Idle...</div>
+            </div>
+
+            <!-- 4. Scheduling Agent -->
+            <div class="agent-card" id="agent-scheduling" data-agent="scheduling">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="calendar" class="agent-icon"></i>
+                  <span class="agent-name">Scheduling Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Maps tasks to time blocks & flags conflicts.</div>
+              <div class="agent-console" id="console-scheduling">Idle...</div>
+            </div>
+
+            <!-- 5. Productivity Agent -->
+            <div class="agent-card" id="agent-productivity" data-agent="productivity">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="trending-up" class="agent-icon"></i>
+                  <span class="agent-name">Productivity Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Prioritizes tasks (P1-P4) & recommends workflows.</div>
+              <div class="agent-console" id="console-productivity">Idle...</div>
+            </div>
+
+            <!-- 6. Travel Agent -->
+            <div class="agent-card" id="agent-travel" data-agent="travel">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="plane" class="agent-icon"></i>
+                  <span class="agent-name">Travel Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Designs detailed itineraries & checklists.</div>
+              <div class="agent-console" id="console-travel">Idle...</div>
+            </div>
+
+            <!-- 7. Memory Agent -->
+            <div class="agent-card" id="agent-memory" data-agent="memory">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="database" class="agent-icon"></i>
+                  <span class="agent-name">Memory Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Recalls user preferences & requests consent.</div>
+              <div class="agent-console" id="console-memory">Idle...</div>
+            </div>
+
+            <!-- 8. Safety Agent -->
+            <div class="agent-card" id="agent-safety" data-agent="safety">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="shield-check" class="agent-icon"></i>
+                  <span class="agent-name">Safety Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Audits content for safety, privacy, & compliance.</div>
+              <div class="agent-console" id="console-safety">Idle...</div>
+            </div>
+
+            <!-- 9. Response Agent -->
+            <div class="agent-card" id="agent-response" data-agent="response">
+              <div class="agent-card-header">
+                <div class="agent-info">
+                  <i data-lucide="message-square-code" class="agent-icon"></i>
+                  <span class="agent-name">Response Agent</span>
+                </div>
+                <div class="agent-status-dot"></div>
+              </div>
+              <div class="agent-description">Aggregates agent data into final structure.</div>
+              <div class="agent-console" id="console-response">Idle...</div>
+            </div>
+          </div>
+
+          <!-- Bottom Console System Feed -->
+          <div class="system-feed-container">
+            <div class="feed-header">
+              <span>SYSTEM EVENT CONSOLE</span>
+              <button id="clear-feed-btn" title="Clear Event Logs"><i data-lucide="trash-2"></i></button>
+            </div>
+            <div id="system-feed-logs">
+              <div class="feed-line system-line">[SYSTEM] ConciergeAI Core initialized...</div>
+              <div class="feed-line system-line">[SYSTEM] Specialist Agent nodes Online (9/9)</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- COLUMN 2: INTERACTIVE CHAT CONSOLE -->
+        <section id="chat-section" aria-label="Conversation Panel">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <i data-lucide="message-circle" class="panel-icon"></i>
+              <h2>Chat Terminal</h2>
+            </div>
+            <span class="chat-status-active">SESSION STABLE</span>
+          </div>
+
+          <div id="chat-messages-container">
+            <!-- Initial welcome message -->
+            <div class="chat-bubble bot-message">
+              <div class="message-meta">
+                <span class="sender-name">ConciergeAI</span>
+                <span class="message-time">18:28</span>
+              </div>
+              <div class="message-body">
+                <p>Hello! I am <strong>ConciergeAI</strong>, your advanced multi-agent concierge assistant.</p>
+                <p>I operate using a parallelized agent matrix to analyze, plan, and execute tasks on your behalf. Try submitting a request below or use one of the prompt presets to see the multi-agent system in action.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prompt Preset Chips -->
+          <div class="prompt-presets-container">
+            <span class="presets-label">Prompt Presets:</span>
+            <div class="preset-chips">
+              <button class="preset-chip" data-preset="travel" type="button">
+                <i data-lucide="map-pin"></i> Plan 4-day Kyoto Trip
+              </button>
+              <button class="preset-chip" data-preset="schedule" type="button">
+                <i data-lucide="clock"></i> Optimize Study Schedule
+              </button>
+              <button class="preset-chip" data-preset="tasks" type="button">
+                <i data-lucide="check-square"></i> Prioritize Tasks (P1-P4)
+              </button>
+              <button class="preset-chip" data-preset="summary" type="button">
+                <i data-lucide="file-text"></i> Summarize Meeting Notes
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat Input Form -->
+          <form id="chat-input-form">
+            <div class="input-glow-wrapper">
+              <input type="text" id="chat-user-input" autocomplete="off" placeholder="Ask ConciergeAI to plan, schedule, prioritize..." required />
+              <button type="submit" id="chat-submit-btn" aria-label="Send Message">
+                <i data-lucide="send"></i>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- COLUMN 3: WORKSPACE DASHBOARD -->
+        <section id="workspace-dashboard" aria-label="Workspace Dashboard">
+          <!-- Navigation Tabs -->
+          <nav class="dashboard-tabs" aria-label="Dashboard Navigation">
+            <button class="tab-btn active" data-tab="productivity" id="tab-btn-productivity">
+              <i data-lucide="list-todo"></i> Tasks
+            </button>
+            <button class="tab-btn" data-tab="schedule" id="tab-btn-schedule">
+              <i data-lucide="calendar-days"></i> Schedule
+            </button>
+            <button class="tab-btn" data-tab="itinerary" id="tab-btn-itinerary">
+              <i data-lucide="compass"></i> Itinerary
+            </button>
+            <button class="tab-btn" data-tab="summarizer" id="tab-btn-summarizer">
+              <i data-lucide="file-text"></i> Summarizer
+            </button>
+            <button class="tab-btn" data-tab="memory" id="tab-btn-memory">
+              <i data-lucide="brain"></i> Memory
+            </button>
+          </nav>
+
+          <!-- Tab Content Container -->
+          <div class="tab-content-container">
+
+            <!-- 1. PRODUCTIVITY TAB -->
+            <div class="tab-pane active" id="pane-productivity">
+              <div class="pane-header">
+                <h3>Task Prioritization Board</h3>
+                <span class="priority-count-badge" id="productivity-counter">0 Tasks</span>
+              </div>
+              <p class="pane-description">Drag, drop, or check items. Classified using our P1 (Critical) to P4 (Optional) framework.</p>
+              
+              <!-- Quick Task Creator -->
+              <form id="widget-task-form" class="widget-quick-form">
+                <input type="text" id="new-task-text" placeholder="Add custom task..." required />
+                <select id="new-task-priority">
+                  <option value="P1">P1 Critical</option>
+                  <option value="P2" selected>P2 Important</option>
+                  <option value="P3">P3 Useful</option>
+                  <option value="P4">P4 Optional</option>
+                </select>
+                <button type="submit" class="btn-primary-sm">Add</button>
+              </form>
+
+              <!-- Priority Columns -->
+              <div class="productivity-columns">
+                <!-- P1 -->
+                <div class="priority-col p1-col">
+                  <div class="col-header">
+                    <span class="priority-bullet bullet-p1"></span>
+                    <h4>P1 Critical</h4>
+                  </div>
+                  <ul class="task-list" id="task-list-p1">
+                    <!-- Dynamic -->
+                  </ul>
+                </div>
+                
+                <!-- P2 -->
+                <div class="priority-col p2-col">
+                  <div class="col-header">
+                    <span class="priority-bullet bullet-p2"></span>
+                    <h4>P2 Important</h4>
+                  </div>
+                  <ul class="task-list" id="task-list-p2">
+                    <!-- Dynamic -->
+                  </ul>
+                </div>
+
+                <!-- P3 -->
+                <div class="priority-col p3-col">
+                  <div class="col-header">
+                    <span class="priority-bullet bullet-p3"></span>
+                    <h4>P3 Useful</h4>
+                  </div>
+                  <ul class="task-list" id="task-list-p3">
+                    <!-- Dynamic -->
+                  </ul>
+                </div>
+
+                <!-- P4 -->
+                <div class="priority-col p4-col">
+                  <div class="col-header">
+                    <span class="priority-bullet bullet-p4"></span>
+                    <h4>P4 Optional</h4>
+                  </div>
+                  <ul class="task-list" id="task-list-p4">
+                    <!-- Dynamic -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. SCHEDULE TAB -->
+            <div class="tab-pane" id="pane-schedule">
+              <div class="pane-header">
+                <h3>Time Blocking Calendar</h3>
+                <button id="add-schedule-item-btn" class="btn-secondary-sm"><i data-lucide="plus"></i> Time Block</button>
+              </div>
+              <p class="pane-description">Optimized timeline avoiding fatigue. Includes buffer time and protected deep-work sessions.</p>
+
+              <!-- Quick Time Block Form (Modal / inline hidden by default) -->
+              <form id="widget-schedule-form" class="widget-quick-form hidden">
+                <input type="text" id="sched-title" placeholder="Event Name" required />
+                <input type="time" id="sched-start" value="09:00" required />
+                <input type="time" id="sched-end" value="10:30" required />
+                <select id="sched-type">
+                  <option value="deep-work">Deep Work</option>
+                  <option value="break">Break / Buffer</option>
+                  <option value="meeting">Meeting / Sync</option>
+                  <option value="routine">Routine / Admin</option>
+                </select>
+                <button type="submit" class="btn-primary-sm">Create</button>
+                <button type="button" id="close-sched-form-btn" class="btn-text-sm">Cancel</button>
+              </form>
+
+              <!-- Time Grid -->
+              <div class="calendar-grid-container">
+                <div class="calendar-header-days">
+                  <div class="day-header active-day">Today (Wednesday)</div>
+                </div>
+                <div class="calendar-timeline" id="calendar-timeline-grid">
+                  <!-- Dynamic hourly blocks and tasks -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. ITINERARY TAB -->
+            <div class="tab-pane" id="pane-itinerary">
+              <div class="pane-header">
+                <h3>Travel Planner</h3>
+                <span class="itinerary-dest" id="itinerary-destination-title">Kyoto, Japan</span>
+              </div>
+              <p class="pane-description">Convenience-optimized route itinerary with day-by-day maps, budgets, and packing lists.</p>
+
+              <div class="itinerary-layout">
+                <!-- Day Select & Description -->
+                <div class="itinerary-main-panel">
+                  <div class="day-tabs-container" id="itinerary-day-tabs">
+                    <!-- Dynamic tabs for Day 1, 2, 3... -->
+                  </div>
+                  <div class="day-itinerary-details" id="itinerary-day-content">
+                    <!-- Dynamic itinerary events for the selected day -->
+                  </div>
+                </div>
+
+                <!-- Right checklist/side pane -->
+                <div class="itinerary-sidebar-panel">
+                  <div class="itinerary-widget-card budget-card">
+                    <h4>Trip Budget Details</h4>
+                    <div class="budget-row">
+                      <span>Total Budget:</span>
+                      <span id="itinerary-budget-total" class="budget-val">$2,500</span>
+                    </div>
+                    <div class="budget-row">
+                      <span>Estimated Expense:</span>
+                      <span id="itinerary-budget-spent" class="budget-val spent-green">$1,850</span>
+                    </div>
+                  </div>
+                  
+                  <div class="itinerary-widget-card packing-card">
+                    <h4>Consolidated Packing Checklist</h4>
+                    <ul class="packing-checklist" id="itinerary-packing-list">
+                      <!-- Dynamic checklist items -->
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. SUMMARIZER TAB -->
+            <div class="tab-pane" id="pane-summarizer">
+              <div class="pane-header">
+                <h3>Document & Notes Summarizer</h3>
+                <button id="summarize-action-btn" class="btn-primary-sm">Process Summary</button>
+              </div>
+              <p class="pane-description">Paste raw memos, transcripts, or notes. Extracts actions, decisions, and deadlines.</p>
+
+              <div class="summarizer-grid">
+                <div class="summarizer-input-side">
+                  <label for="summarizer-raw-input">Raw Text / Notes</label>
+                  <textarea id="summarizer-raw-input" placeholder="Paste your raw notes here... For example:
+- Marketing sync today at 2pm.
+- Review budget drafts before Friday at noon (Sarah).
+- Agreed to launch the beta on July 10th.
+- Set up weekly dashboard reports starting Monday."></textarea>
+                </div>
+
+                <div class="summarizer-output-side" id="summarizer-output-box">
+                  <div class="summary-empty-state">
+                    <i data-lucide="file-check-2"></i>
+                    <p>Paste notes on the left and click 'Process Summary' to run the extraction engine.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. MEMORY TAB -->
+            <div class="tab-pane" id="pane-memory">
+              <div class="pane-header">
+                <h3>Consensual Memory Bank</h3>
+                <button id="clear-memory-btn" class="btn-secondary-sm danger-btn"><i data-lucide="trash-2"></i> Wipe Memory</button>
+              </div>
+              <p class="pane-description">Personal preferences recalled across sessions. Memory Agent asks for permission before storing.</p>
+
+              <div class="memory-grid">
+                <div class="memory-left-card">
+                  <h4>Memory Options</h4>
+                  <div class="preference-toggle-item">
+                    <div class="pref-label-group">
+                      <span class="pref-title">Enable Long-Term Memory</span>
+                      <span class="pref-desc">Allow ConciergeAI to suggest remembering important dates, schedules, and preferences.</span>
+                    </div>
+                    <label class="switch-container">
+                      <input type="checkbox" id="memory-enabled-toggle" checked />
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div class="preference-toggle-item">
+                    <div class="pref-label-group">
+                      <span class="pref-title">Strict Privacy Shield</span>
+                      <span class="pref-desc">Scrub personal location coordinates and phone references before processing queries.</span>
+                    </div>
+                    <label class="switch-container">
+                      <input type="checkbox" id="privacy-shield-toggle" checked />
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="memory-right-card">
+                  <h4>Remembered Facts & Preferences</h4>
+                  <ul class="remembered-list" id="memory-facts-list">
+                    <!-- Dynamic -->
+                  </ul>
+                  <form id="add-memory-form" class="widget-quick-form">
+                    <input type="text" id="new-memory-text" placeholder="Add manual user preference..." required />
+                    <button type="submit" class="btn-primary-sm">Remember</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- CONSENT POPUP DIALOG -->
+      <div id="consent-popup" class="consent-dialog hidden">
+        <div class="consent-dialog-box glass-panel">
+          <div class="consent-icon-wrapper">
+            <i data-lucide="brain-circuit" class="consent-icon"></i>
+          </div>
+          <div class="consent-text">
+            <h4>Memory Retention Consent</h4>
+            <p id="consent-message">ConciergeAI would like to remember this preference: &quot;Vegetarian food only during travel.&quot;</p>
+          </div>
+          <div class="consent-actions">
+            <button id="consent-deny-btn" class="btn-secondary-sm">Decline</button>
+            <button id="consent-approve-btn" class="btn-primary-sm">Allow Memory</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
